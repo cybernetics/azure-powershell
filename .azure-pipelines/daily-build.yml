@@ -9,6 +9,12 @@ steps:
   displayName: 'Install platyPS'
   inputs:
     targetType: inline
+    script: 'git checkout internal/Az.Installer'
+  
+- task: PowerShell@2
+  displayName: 'Install platyPS'
+  inputs:
+    targetType: inline
     script: 'Install-Module platyPS -Force -Confirm:$false -Scope CurrentUser'
 
 - task: PowerShell@2
