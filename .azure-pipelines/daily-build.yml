@@ -5,7 +5,7 @@ schedules:
   displayName: Daily Midnight Build
   branches:
     include:
-    - master
+    - internal/dailyBuild
 
 pr: none
 
@@ -16,50 +16,50 @@ stages:
     pool:
       vmImage: 'windows-2019'
     steps:
-    - task: PowerShell@2
-      displayName: Initialization
-      inputs:
-        targetType: 'inline'
-        script: |
-          # Avoid issue of filename too long
-          git config --global core.longpaths true
+    # - task: PowerShell@2
+    #   displayName: Initialization
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       # Avoid issue of filename too long
+    #       git config --global core.longpaths true
           
-          # Wipe any changes from a previous branch
-          git clean -xdf
+    #       # Wipe any changes from a previous branch
+    #       git clean -xdf
           
-          # Ensure the installation policy of PSGallery is Trusted
-          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+    #       # Ensure the installation policy of PSGallery is Trusted
+    #       Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 
-          # Sync with master
-          git config user.email "bez@microsoft.com"
-          git config user.name "azuresdkci"
-          git remote set-url origin https://$(Token)@github.com/Azure/azure-powershell.git
-          git checkout -b internal/dailyBuild
+    #       # Sync with master
+    #       git config user.email "bez@microsoft.com"
+    #       git config user.name "azuresdkci"
+    #       git remote set-url origin https://$(Token)@github.com/Azure/azure-powershell.git
+    #       git checkout -b internal/dailyBuild
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Build Products'
-      inputs:
-        command: custom
-        custom: msbuild
-        arguments: 'build.proj /t:Build /p:Configuration=Release'
+    # - task: DotNetCoreCLI@2
+    #   displayName: 'Build Products'
+    #   inputs:
+    #     command: custom
+    #     custom: msbuild
+    #     arguments: 'build.proj /t:Build /p:Configuration=Release'
 
-    - task: PowerShell@2
-      displayName: VersionBump
-      inputs:
-        targetType: filePath
-        filePath: ./tools/RunVersionController.ps1
-        arguments: '-Release "$(MonthName) $(Year)"'
-        pwsh: true
+    # - task: PowerShell@2
+    #   displayName: VersionBump
+    #   inputs:
+    #     targetType: filePath
+    #     filePath: ./tools/RunVersionController.ps1
+    #     arguments: '-Release "$(MonthName) $(Year)"'
+    #     pwsh: true
 
-    - task: PowerShell@2
-      displayName: Commit Change 
-      inputs:
-        targetType: 'inline'
-        script: |
-          git add .
-          git commit -m "bump version"
-          git status
-          git push origin internal/dailyBuild --force
+    # - task: PowerShell@2
+    #   displayName: Commit Change 
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: |
+    #       git add .
+    #       git commit -m "bump version"
+    #       git status
+    #       git push origin internal/dailyBuild --force
 
     - task: PowerShell@2
       displayName: 'Install platyPS'
