@@ -36,30 +36,30 @@ stages:
           git remote set-url origin https://$(Token)@github.com/Azure/azure-powershell.git
           git checkout -b internal/dailyBuild
 
-    # - task: DotNetCoreCLI@2
-    #   displayName: 'Build Products'
-    #   inputs:
-    #     command: custom
-    #     custom: msbuild
-    #     arguments: 'build.proj /t:Build /p:Configuration=Release'
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Products'
+      inputs:
+        command: custom
+        custom: msbuild
+        arguments: 'build.proj /t:Build /p:Configuration=Release'
 
-    # - task: PowerShell@2
-    #   displayName: VersionBump
-    #   inputs:
-    #     targetType: filePath
-    #     filePath: ./tools/RunVersionController.ps1
-    #     arguments: '-Release "$(MonthName) $(Year)"'
-    #     pwsh: true
+    - task: PowerShell@2
+      displayName: VersionBump
+      inputs:
+        targetType: filePath
+        filePath: ./tools/RunVersionController.ps1
+        arguments: '-Release "$(MonthName) $(Year)"'
+        pwsh: true
 
-    # - task: PowerShell@2
-    #   displayName: Commit Change 
-    #   inputs:
-    #     targetType: 'inline'
-    #     script: |
-    #       git add .
-    #       git commit -m "bump version"
-    #       git status
-    #       git push origin internal/dailyBuild --force
+    - task: PowerShell@2
+      displayName: Commit Change 
+      inputs:
+        targetType: 'inline'
+        script: |
+          git add .
+          git commit -m "bump version"
+          git status
+          git push origin internal/dailyBuild --force
 
     - task: PowerShell@2
       displayName: 'Install platyPS'
@@ -217,20 +217,6 @@ stages:
     #           "ToolVersion": "1.0"
     #         }
     #       ]
-    - task: PowerShell@2
-      displayName: After Signing
-      inputs:
-        targetType: 'inline'
-        script: |
-          # Check Signature
-          $Env:Path += ";C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools"
-          # Do not check psd1
-          $Env:CheckPsd1 = "False"
-          ./tools/CheckSignature.ps1 -CustomPath $Env:RepoArtifacts/$Env:Configuration
-
-          # Copy files back after signing
-          Copy-Item $Env:RepoArtifacts/$Env:Configuration/Az.psm1 -Destination ./tools/Az
-        pwsh: true
 
     - task: DotNetCoreCLI@2
       displayName: Publish
